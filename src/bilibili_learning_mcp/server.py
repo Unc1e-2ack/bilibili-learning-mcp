@@ -285,6 +285,64 @@ async def get_subtitles(
 
     return "\n".join(lines)
 
+@mcp.tool(name="get_hot_comments", title="Get hot Bilibili comments")
+async def get_hot_comments(bv_id: str, limit: int = 10) -> str:
+    """按点赞数排序返回视频的热门评论，用来判断视频质量和观众口碑。
+
+    何时调用：
+        - 用户想知道某个视频「值不值得看」「大家评价怎么样」时。
+        - 总结完视频内容后，想补充观众反馈作为参考时。
+        - 不要用它替代 get_subtitles 做内容总结：评论只有观点，没有讲解内容。
+
+    参数：
+        bv_id: BV 号或完整链接，例如 "BV1GJ411x7h7"。
+        limit: 返回条数，范围 1-49，默认 10。
+
+    返回示例：
+        《线性代数的本质》热门评论（按点赞排序，共 1234 条，返回前 2 条）：
+
+        1. 👍 892 | 某用户
+           讲得比我们老师清楚多了
+        2. 👍 431 | 另一个用户
+           第三集开始有点快，建议 0.75 倍速
+
+    失败时：
+        返回以「获取评论失败：」开头的说明；评论区关闭时会明确告知，
+        此时可以改用 get_subtitles 或 get_video_info 了解内容。
+    """
+    try:
+        payload = await bilibili_api.get_client().get_hot_comments(bv_id, limit)
+    except BilibiliError as exc:
+        return f"获取评论失败：{exc}"
+    except Exception as exc:
+        return f"获取评论失败：{_error_text(exc)}"
+
+    comments = payload["comments"]
+    if not comments:
+        return (
+            f"《{payload['video_title']}》暂无可显示的评论："
+            "可能评论区已关闭、视频太新还没有评论，或该稿件不允许评论。"
+            "可以改用 get_subtitles 了解视频内容。"
+        )
+
+    lines = [
+        f"《{payload['video_title']}》热门评论"
+        f"（按点赞排序，共 {_human_count(payload['total'])} 条，返回前 {len(comments)} 条）：",
+        "",
+    ]
+    for index, comment in enumerate(comments, start=1):
+        text = " ".join(comment["content"].split())
+        if len(text) > 300:
+            text = f"{text[:300]}……"
+        lines.extend(
+            [
+                f"{index}. 👍 {_human_count(comment['like'])} | {comment['user']}",
+                f"   {text}",
+            ]
+        )
+
+    return "\n".join(lines)
+
 
 def main() -> None:
     """Run the MCP server over stdio."""

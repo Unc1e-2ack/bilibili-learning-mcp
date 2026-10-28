@@ -696,6 +696,7 @@ class BilibiliClient:
 
         return {
             "bvid": info["bvid"],
+            "video_title": info["title"],
             "aid": aid,
             "total": _to_int(page_info.get("count")),
             "returned": len(comments[: max(1, limit)]),
