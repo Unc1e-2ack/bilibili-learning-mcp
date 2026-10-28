@@ -8,7 +8,9 @@ can read directly.
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
@@ -74,6 +76,26 @@ def _error_text(exc: Exception) -> str:
         f"内部错误（{exc.__class__.__name__}）：{exc}。"
         "请重试一次；若持续失败，请把这条信息反馈给用户并建议提交 issue。"
     )
+
+
+def _load_dotenv(path: Path | None = None) -> None:
+    """Load ``KEY=VALUE`` pairs from a .env file without overriding real env vars.
+
+    Args:
+        path: File to read; defaults to ``.env`` in the current directory.
+    """
+    env_path = path if path is not None else Path.cwd() / ".env"
+    if not env_path.is_file():
+        return
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
 
 
 @mcp.tool(name="search_videos", title="Search Bilibili videos")
@@ -348,6 +370,7 @@ async def get_hot_comments(bv_id: str, limit: int = 10) -> str:
 
 def main() -> None:
     """Run the MCP server over stdio."""
+    _load_dotenv()
     mcp.run(transport="stdio")
 
 

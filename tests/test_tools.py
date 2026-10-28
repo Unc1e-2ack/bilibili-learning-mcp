@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable, Iterator
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -267,3 +269,19 @@ async def test_get_hot_comments_handles_empty_section() -> None:
 
     assert "暂无可显示的评论" in text
     assert "get_subtitles" in text
+
+
+async def test_dotenv_is_loaded_without_overriding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A .env file fills gaps but never wins over an exported variable."""
+    dotenv = tmp_path / ".env"
+    dotenv.write_text("# comment\nBILIBILI_COOKIE=SESSDATA=from-file\n", encoding="utf-8")
+
+    monkeypatch.delenv("BILIBILI_COOKIE", raising=False)
+    server._load_dotenv(dotenv)
+    assert os.environ["BILIBILI_COOKIE"] == "SESSDATA=from-file"
+
+    monkeypatch.setenv("BILIBILI_COOKIE", "existing")
+    server._load_dotenv(dotenv)
+    assert os.environ["BILIBILI_COOKIE"] == "existing"
