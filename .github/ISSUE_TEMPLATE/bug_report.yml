@@ -1,0 +1,49 @@
+name: Bug report
+description: 报告一个可复现的问题
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！提交前请先搜索现有 issue。
+        **绝对不要粘贴 Cookie、SESSDATA 或任何账号凭证。**
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 发生了什么？你期望的结果是什么？
+      placeholder: 调用 search_videos 返回「搜索失败：...」，期望返回视频列表。
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: 使用的客户端
+      options:
+        - Claude Desktop
+        - Codex
+        - MCP Inspector
+        - 其它
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / commit
+      placeholder: 0.1.0 或 commit sha
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志
+      description: 请先删除 Cookie、SESSDATA 等敏感信息。
+      render: shell
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 我已确认输出中不包含 Cookie 或个人信息
+          required: true

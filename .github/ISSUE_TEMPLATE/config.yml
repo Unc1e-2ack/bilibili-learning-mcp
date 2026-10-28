@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全问题
+    url: https://github.com/Unc1e-2ack/bilibili-learning-mcp/security/policy
+    about: 请勿公开披露漏洞，按 SECURITY.md 私下报告。
