@@ -127,6 +127,87 @@ async def search_videos(keyword: str, limit: int = 5) -> str:
     )
     return "\n".join(lines)
 
+@mcp.tool(name="get_video_info", title="Get Bilibili video info")
+async def get_video_info(bv_id: str) -> str:
+    """读取单个 B 站视频的详细信息：标题、简介、UP主、分P列表（含 cid）、互动数据、时长。
+
+    何时调用：
+        - 用户给了 BV 号或视频链接，想了解这个视频讲了什么时。
+        - 调用 get_subtitles 或 get_hot_comments 之前，先确认分P数量和 cid。
+        - 视频没有字幕时，用简介判断内容是否值得看。
+
+    参数：
+        bv_id: BV 号或完整链接。支持 "BV1GJ411x7h7"、
+            "https://www.bilibili.com/video/BV1GJ411x7h7"、
+            "https://www.bilibili.com/video/BV1GJ411x7h7?p=2" 等写法。
+            注意 BV 号主体区分大小写，请原样复制，不要手打。
+
+    返回示例：
+        标题：线性代数的本质
+        BV号：BV1GJ411x7h7 | AV号：8047632
+        UP主：3Blue1Brown
+        时长：1:02:03（3723 秒）
+        播放：1234.5万 | 点赞：8.9万 | 收藏：3.2万 | 投币：1.1万 | 评论：4321
+        发布时间：2020-05-01
+        链接：https://www.bilibili.com/video/BV1GJ411x7h7
+
+        简介：
+        （最多 800 字，超出会标注「已截断」）
+
+        分P列表（共 2 P）：
+        P1 | cid=12345678 | 00:12:34 | 向量是什么
+        P2 | cid=12345679 | 00:15:01 | 线性组合
+
+    失败时：
+        返回以「获取视频信息失败：」开头的说明。BV 号格式错误时会提示正确写法，
+        视频不存在或被删除时会说明原因，不要用同样的参数重试。
+    """
+    try:
+        info = await bilibili_api.get_client().get_video_info(bv_id)
+    except BilibiliError as exc:
+        return f"获取视频信息失败：{exc}"
+    except Exception as exc:
+        return f"获取视频信息失败：{_error_text(exc)}"
+
+    stats = info["stats"]
+    desc = info["desc"].strip() or "（无简介）"
+    if len(desc) > 800:
+        desc = f"{desc[:800]}……（简介已截断）"
+
+    lines = [
+        f"标题：{info['title']}",
+        f"BV号：{info['bvid']} | AV号：{info['aid']}",
+        f"UP主：{info['owner'] or '未知'}",
+        f"时长：{info['duration_text']}（{info['duration_sec']} 秒）",
+        f"播放：{_human_count(stats['view'])} | 点赞：{_human_count(stats['like'])}"
+        f" | 收藏：{_human_count(stats['favorite'])} | 投币：{_human_count(stats['coin'])}"
+        f" | 评论：{_human_count(stats['reply'])}",
+        f"发布时间：{_format_date(info['pubdate'])}",
+        f"链接：{info['url']}",
+        "",
+        "简介：",
+        desc,
+        "",
+    ]
+
+    pages = info["pages"]
+    if pages:
+        lines.append(f"分P列表（共 {len(pages)} P）：")
+        for part in pages:
+            lines.append(
+                f"P{part['page']} | cid={part['cid']}"
+                f" | {bilibili_api.format_duration(part['duration_sec'])} | {part['title']}"
+            )
+        lines.append("")
+        lines.append(
+            '下一步：用 get_subtitles(bv_id="{}", page=1) 读取第 1 P 字幕，'
+            "或用 get_hot_comments 看看观众怎么说。".format(info["bvid"])
+        )
+    else:
+        lines.append("分P列表：接口未返回分P信息，可能是不支持分P的稿件。")
+
+    return "\n".join(lines)
+
 
 def main() -> None:
     """Run the MCP server over stdio."""
