@@ -50,8 +50,7 @@ _ERROR_HINTS: dict[int, str] = {
     -101: "账号未登录或 Cookie 已失效：请重新登录 B 站并更新 BILIBILI_COOKIE。",
     -102: "账号被封禁：请更换一个可用的 B 站账号 Cookie。",
     -352: (
-        "被 B 站风控校验拦截（-352）：WBI 签名 key 可能已过期，请稍后重试；"
-        "持续失败请更新 Cookie。"
+        "被 B 站风控校验拦截（-352）：WBI 签名 key 可能已过期，请稍后重试；持续失败请更新 Cookie。"
     ),
     -400: "请求参数有误（-400）：请检查 BV 号、分P页码是否正确。",
     -403: "访问被拒绝（-403）：该资源可能要求登录，或当前账号权限不足。",
@@ -429,6 +428,7 @@ class BilibiliClient:
             )
         self._wbi_keys = (img_key, sub_key, time.monotonic() + WBI_KEY_TTL)
         return img_key, sub_key
+
     async def search_videos(self, keyword: str, limit: int = 5) -> list[dict[str, Any]]:
         """Search Bilibili videos by keyword.
 
@@ -587,9 +587,7 @@ class BilibiliClient:
         subtitle = data.get("subtitle") if isinstance(data.get("subtitle"), dict) else {}
         tracks = subtitle.get("subtitles") if isinstance(subtitle.get("subtitles"), list) else []
         tracks = [
-            track
-            for track in tracks
-            if isinstance(track, dict) and track.get("subtitle_url")
+            track for track in tracks if isinstance(track, dict) and track.get("subtitle_url")
         ]
         if not tracks:
             return {

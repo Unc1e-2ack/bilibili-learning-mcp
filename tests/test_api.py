@@ -183,9 +183,24 @@ def test_wbi_keys_are_cached(make_client: Callable[..., Any]) -> None:
         nav_calls.append(request)
         return nav(request)
 
-    client = make_client(route(nav=counting_nav, search=lambda _: ok({"result": [
-        {"title": "t", "author": "a", "bvid": "BV1xx411c7mD", "duration": "1:00", "play": 1}
-    ]})))
+    client = make_client(
+        route(
+            nav=counting_nav,
+            search=lambda _: ok(
+                {
+                    "result": [
+                        {
+                            "title": "t",
+                            "author": "a",
+                            "bvid": "BV1xx411c7mD",
+                            "duration": "1:00",
+                            "play": 1,
+                        }
+                    ]
+                }
+            ),
+        )
+    )
 
     _run(client.search_videos("a", 1))
     _run(client.search_videos("b", 1))
@@ -317,7 +332,11 @@ def test_get_subtitles_truncates_long_tracks(
             {
                 "subtitle": {
                     "subtitles": [
-                        {"lan": "ai-zh", "lan_doc": "AI", "subtitle_url": "https://aisubtitle.hdslb.com/bfs/ai/x.json"}
+                        {
+                            "lan": "ai-zh",
+                            "lan_doc": "AI",
+                            "subtitle_url": "https://aisubtitle.hdslb.com/bfs/ai/x.json",
+                        }
                     ]
                 }
             }

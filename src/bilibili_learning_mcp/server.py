@@ -122,10 +122,10 @@ async def search_videos(keyword: str, limit: int = 5) -> str:
             ]
         )
     lines.append(
-        '下一步：用 get_video_info(bv_id="上面的BV号") 查看简介和分P，'
-        "再用 get_subtitles 读取字幕。"
+        '下一步：用 get_video_info(bv_id="上面的BV号") 查看简介和分P，再用 get_subtitles 读取字幕。'
     )
     return "\n".join(lines)
+
 
 @mcp.tool(name="get_video_info", title="Get Bilibili video info")
 async def get_video_info(bv_id: str) -> str:
@@ -208,6 +208,7 @@ async def get_video_info(bv_id: str) -> str:
 
     return "\n".join(lines)
 
+
 @mcp.tool(name="get_subtitles", title="Read Bilibili subtitles")
 async def get_subtitles(
     bv_id: str,
@@ -284,6 +285,7 @@ async def get_subtitles(
         )
 
     return "\n".join(lines)
+
 
 @mcp.tool(name="get_hot_comments", title="Get hot Bilibili comments")
 async def get_hot_comments(bv_id: str, limit: int = 10) -> str:
