@@ -47,6 +47,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 addopts = "-q"
 
 [tool.ruff]
@@ -56,7 +57,7 @@ src = ["src", "tests", "main.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "D", "ASYNC", "RUF"]
-ignore = ["D203", "D213"]
+ignore = ["D203", "D213", "D400", "D415", "RUF001", "RUF002", "RUF003"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
