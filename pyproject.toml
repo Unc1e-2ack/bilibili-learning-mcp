@@ -1,0 +1,65 @@
+[project]
+name = "bilibili-learning-mcp"
+version = "0.1.0"
+description = "MCP server that exposes Bilibili learning videos, subtitles and hot comments to LLM clients."
+readme = "README.md"
+authors = [
+    { name = "Unc1e-2ack", email = "1747565471@qq.com" }
+]
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["mcp", "bilibili", "llm", "subtitles", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "httpx>=0.27",
+    "mcp>=1.30,<2",
+]
+
+[project.scripts]
+bilibili-learning-mcp = "bilibili_learning_mcp.server:main"
+
+[project.urls]
+Homepage = "https://github.com/Unc1e-2ack/bilibili-learning-mcp"
+Repository = "https://github.com/Unc1e-2ack/bilibili-learning-mcp"
+Issues = "https://github.com/Unc1e-2ack/bilibili-learning-mcp/issues"
+
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "main.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "D", "ASYNC", "RUF"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D103", "ANN201"]
