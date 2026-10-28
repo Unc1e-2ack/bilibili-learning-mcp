@@ -635,6 +635,7 @@ class BilibiliClient:
         return {
             "available": True,
             "bvid": info["bvid"],
+            "video_title": info["title"],
             "page": page,
             "page_title": part["title"],
             "cid": cid,

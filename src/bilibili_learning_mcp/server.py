@@ -208,6 +208,83 @@ async def get_video_info(bv_id: str) -> str:
 
     return "\n".join(lines)
 
+@mcp.tool(name="get_subtitles", title="Read Bilibili subtitles")
+async def get_subtitles(
+    bv_id: str,
+    page: int = 1,
+    start_sec: int | None = None,
+    end_sec: int | None = None,
+) -> str:
+    """读取视频某一 P 的字幕，按 "[mm:ss] 文本" 逐行返回，适合做带时间戳的笔记。
+
+    何时调用：
+        - 用户要总结视频、做学习笔记、提取知识点时（这是最重要的素材来源，优先于简介）。
+        - 需要引用原话或定位具体时间点时。
+        - 用户问「这个视频讲了什么」而 get_video_info 的简介太简略时。
+
+    参数：
+        bv_id: BV 号或完整链接，例如 "BV1GJ411x7h7"。
+        page: 分P序号，从 1 开始，默认 1。先用 get_video_info 查看共几 P。
+        start_sec: 只返回起始时间 >= 该秒数的字幕，例如 600 表示 10:00 之后。
+        end_sec: 只返回起始时间 <= 该秒数的字幕，例如 1200 表示 20:00 之前。
+            字幕过长时可分段读取：先 0-600，再 600-1200……
+
+    返回示例：
+        《线性代数的本质》第 1 P（向量是什么）字幕 - 中文（自动生成），共 412 行
+        时间范围：00:00 - 06:52
+
+        [00:00] 这个视频我们来聊向量
+        [00:03] 首先从物理学的角度
+
+    注意：
+        - AI 字幕需要登录 Cookie；部分视频没有字幕，此时会返回明确提示。
+        - 单次最多返回 8000 行，超出会截断并说明总行数，请用 start_sec/end_sec 分段读取。
+
+    失败时：
+        返回以「读取字幕失败：」开头的说明，并给出下一步建议。
+    """
+    try:
+        payload = await bilibili_api.get_client().get_subtitles(bv_id, page, start_sec, end_sec)
+    except BilibiliError as exc:
+        return f"读取字幕失败：{exc}"
+    except Exception as exc:
+        return f"读取字幕失败：{_error_text(exc)}"
+
+    if not payload["available"]:
+        return f"读取字幕失败：{payload['reason']}。"
+
+    if start_sec is None and end_sec is None:
+        window = "全片"
+    else:
+        window_start = start_sec if start_sec is not None else 0
+        if end_sec is None:
+            window = f"{bilibili_api.format_duration(window_start)} 起"
+        else:
+            window = (
+                f"{bilibili_api.format_duration(window_start)}"
+                f" - {bilibili_api.format_duration(end_sec)}"
+            )
+
+    header = (
+        f"《{payload['video_title']}》第 {payload['page']} P"
+        f"（{payload['page_title']}）字幕 - {payload['lan_doc'] or payload['lan']}"
+        f"，共 {payload['total_lines']} 行"
+    )
+    lines = [header, f"时间范围：{window}", ""]
+    lines.extend(payload["lines"])
+
+    if payload["truncated"]:
+        lines.extend(
+            [
+                "",
+                f"注意：该时间段内共有 {payload['total_lines']} 行字幕，"
+                f"单次最多返回 {payload['truncate_limit']} 行，已截断。",
+                "请用 start_sec / end_sec 分段读取剩余部分（例如 480-960）。",
+            ]
+        )
+
+    return "\n".join(lines)
+
 
 def main() -> None:
     """Run the MCP server over stdio."""
