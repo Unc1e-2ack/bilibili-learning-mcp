@@ -12,10 +12,13 @@ venv/
 uv.lock.bak
 
 # Tooling caches
+.probe/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
 
 # Secrets
