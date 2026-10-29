@@ -6,6 +6,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: chore
+    ignore:
+      # mcp 2.x 移除了 FastMCP，本项目暂不兼容，只允许 1.x 的小版本/补丁更新
+      - dependency-name: mcp
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
