@@ -5,6 +5,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- CI：将 `astral-sh/setup-uv` 固定到 `v10.3.3`（该仓库没有 `v10` 浮动标签，
+  `@v10` 会导致所有 job 在 Set up job 阶段失败）
+
 ## [0.1.0] - 2026-10-29
 
 ### Added
