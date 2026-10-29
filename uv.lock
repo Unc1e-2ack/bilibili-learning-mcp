@@ -85,7 +85,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mcp", extras = ["cli"], specifier = ">=1.30.0" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.30,<2" },
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "ruff", specifier = ">=0.7" },
