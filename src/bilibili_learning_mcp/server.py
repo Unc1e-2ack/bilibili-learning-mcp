@@ -109,7 +109,8 @@ async def search_videos(keyword: str, limit: int = 5) -> str:
 
     参数：
         keyword: 搜索关键词，建议 1-4 个词，例如 "线性代数 期末速成"、"MIT 6.824"。
-            支持中英文和空格；不要传 URL 或 BV 号。
+            支持中英文和空格；不要传 URL 或 BV 号。无需 Cookie 也能搜索，
+            配置 Cookie 可提高被风控时的成功率。
         limit: 返回条数，范围 1-50，默认 5。给用户做选择时 5-10 条足够。
 
     返回示例：
@@ -121,8 +122,8 @@ async def search_videos(keyword: str, limit: int = 5) -> str:
            链接：https://www.bilibili.com/video/BV1xx411c7mD
 
     失败时：
-        返回以「搜索失败：」开头的中文说明。B 站搜索接口需要登录 Cookie，
-        若提示 Cookie 未配置或已失效，请把配置方法转告用户，不要用相同参数反复重试。
+        返回以「搜索失败：」开头的中文说明。搜索可匿名使用；若被 B 站风控拦截，
+        会提示配置 BILIBILI_COOKIE。请把配置方法转告用户，不要用相同参数反复重试。
     """
     try:
         videos = await bilibili_api.get_client().search_videos(keyword, limit)

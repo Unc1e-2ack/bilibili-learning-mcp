@@ -111,18 +111,44 @@ def test_normalize_bvid_rejects_garbage() -> None:
         normalize_bvid("definitely-not-a-video")
 
 
-def test_search_requires_cookie(make_client: Callable[..., Any]) -> None:
-    """Search fails fast with instructions when no Cookie is configured."""
-    calls: list[httpx.Request] = []
+def test_search_works_without_cookie(make_client: Callable[..., Any]) -> None:
+    """Anonymous search succeeds and the Cookie header stays off the wire."""
+    seen: list[httpx.Request] = []
 
-    def handler(request: httpx.Request) -> httpx.Response:
-        calls.append(request)
-        return nav(request)
+    def search(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return ok(
+            {
+                "result": [
+                    {
+                        "title": "<em>线性代数</em> 期末速成",
+                        "author": "某老师",
+                        "bvid": "BV1xx411c7mD",
+                        "duration": "4:12:30",
+                        "play": 1205000,
+                    }
+                ]
+            }
+        )
 
-    client = make_client(handler, cookie="")
+    client = make_client(route(nav=nav, search=search), cookie="")
+    videos = _run(client.search_videos("线代", 1))
+
+    assert videos[0]["bvid"] == "BV1xx411c7mD"
+    assert "cookie" not in seen[0].headers
+
+
+def test_search_412_without_cookie_suggests_cookie(
+    make_client: Callable[..., Any],
+) -> None:
+    """Anonymous risk-control blocks become setup instructions."""
+    client = make_client(
+        route(nav=nav, search=lambda _: httpx.Response(412)),
+        cookie="",
+    )
+
     with pytest.raises(BilibiliError, match="BILIBILI_COOKIE"):
         _run(client.search_videos("线代", 1))
-    assert calls == []
 
 
 def test_search_parses_results_and_signs_request(make_client: Callable[..., Any]) -> None:

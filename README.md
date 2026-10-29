@@ -15,10 +15,13 @@
 
 | 工具 | 作用 | 需要登录 Cookie |
 | --- | --- | --- |
-| `search_videos` | 关键词搜索，返回标题 / UP主 / BV号 / 时长 / 播放量 | ✅ |
+| `search_videos` | 关键词搜索，返回标题 / UP主 / BV号 / 时长 / 播放量 | ⚪ 可选 |
 | `get_video_info` | 标题、简介、UP主、分P（含 cid）、播放/点赞/收藏、时长 | ❌ |
 | `get_subtitles` | 字幕逐行输出 `[mm:ss] 文本`，支持按秒级时间段截取 | ⚠️ AI 字幕需要 |
 | `get_hot_comments` | 按点赞排序的热门评论，用来判断视频口碑 | ❌ |
+
+> 搜索、视频信息、热门评论均无需登录即可使用；只有 AI 字幕必须登录，
+> Cookie 还能提高搜索在风控下的成功率。
 
 典型用法：
 
@@ -41,7 +44,7 @@ uv sync
 
 ### 3. 配置 B 站 Cookie
 
-B 站搜索接口和 AI 字幕需要登录 Cookie：
+AI 字幕需要登录 Cookie（搜索、视频信息、热门评论可匿名使用）：
 
 1. 浏览器登录 [bilibili.com](https://www.bilibili.com)；
 2. 按 `F12` 打开开发者工具 → **Network**，筛选 `api.bilibili.com`；

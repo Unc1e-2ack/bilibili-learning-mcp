@@ -137,9 +137,15 @@ async def test_search_videos_renders_a_readable_list() -> None:
     assert "https://www.bilibili.com/video/BV1xx411c7mD" in text
 
 
-async def test_search_videos_turns_missing_cookie_into_instructions() -> None:
-    """The no-cookie failure is a prompt, not a stack trace."""
-    install(lambda request: nav(request), cookie="")
+async def test_search_videos_turns_anonymous_block_into_instructions() -> None:
+    """A 412 without Cookie becomes setup instructions, not a stack trace."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/nav"):
+            return nav(request)
+        return httpx.Response(412)
+
+    install(handler, cookie="")
     text = await server.search_videos("线性代数", 5)
 
     assert text.startswith("搜索失败")

@@ -439,9 +439,12 @@ class BilibiliClient:
         Returns:
             Normalised summaries ordered by Bilibili relevance.
 
+        A Cookie is optional: anonymous search works, but a configured Cookie
+        improves reliability when Bilibili applies risk control.
+
         Raises:
-            BilibiliError: When the keyword is empty, the Cookie is missing or
-                the request fails.
+            BilibiliError: When the keyword is empty, the request fails, or
+                anonymous access is blocked by Bilibili's risk control.
         """
         keyword = keyword.strip()
         if not keyword:
@@ -450,17 +453,24 @@ class BilibiliClient:
             )
 
         page_size = max(1, min(limit, 50))
-        data = await self._get_api(
-            "/x/web-interface/wbi/search/type",
-            {
-                "search_type": "video",
-                "keyword": keyword,
-                "page": 1,
-                "page_size": page_size,
-            },
-            require_cookie=True,
-            signed=True,
-        )
+        try:
+            data = await self._get_api(
+                "/x/web-interface/wbi/search/type",
+                {
+                    "search_type": "video",
+                    "keyword": keyword,
+                    "page": 1,
+                    "page_size": page_size,
+                },
+                signed=True,
+            )
+        except BilibiliError as exc:
+            blocked = exc.code in {-101, -352, -509} or "412" in str(exc)
+            if self.cookie_configured or not blocked:
+                raise
+            raise BilibiliError(
+                f"匿名搜索被 B 站风控拦截：配置 BILIBILI_COOKIE 后重试可提高成功率。{COOKIE_HOWTO}"
+            ) from exc
 
         raw_results = data.get("result")
         if not isinstance(raw_results, list) or not raw_results:
