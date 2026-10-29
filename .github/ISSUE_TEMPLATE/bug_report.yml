@@ -27,6 +27,35 @@ body:
         - 其它
     validations:
       required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - 其它
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python 版本
+      placeholder: "3.12.6"
+    validations:
+      required: true
+  - type: dropdown
+    id: cookie
+    attributes:
+      label: Cookie 状态
+      options:
+        - 未配置
+        - 已配置且有效
+        - 已配置但可能失效
+        - 不确定
+    validations:
+      required: true
   - type: input
     id: version
     attributes:
